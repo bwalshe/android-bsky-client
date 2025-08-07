@@ -6,14 +6,13 @@ import work.socialhub.kbsky.api.entity.com.atproto.server.ServerCreateSessionReq
 import work.socialhub.kbsky.auth.AuthProvider
 import work.socialhub.kbsky.auth.BearerTokenAuthProvider
 import work.socialhub.kbsky.model.app.bsky.feed.FeedDefsFeedViewPost
-import work.socialhub.kbsky.model.share.Blob
 
 
 interface BlueSkyRepository {
     fun createSession(identity: String, password: String)
     fun getTimeline(): List<FeedDefsFeedViewPost>
-    fun resolveBlob(owner:String, blob: Blob): String
     val sessionActive: Boolean
+    fun resolveBlob(owner:String, blobLink: String): String
 
 }
 
@@ -44,7 +43,7 @@ class NetworkBlueSkyRepository(private val baseUri: String) : BlueSkyRepository 
         throw IllegalStateException("Cannot get timeline there is no session")
     }
 
-    override fun resolveBlob(owner: String, blob: Blob): String {
-       return "$baseUri/xrpc/com.atproto.sync.getBlob?did=$owner&cid=${blob.ref?.link}"
+    override fun resolveBlob(owner: String, blobLink: String): String {
+       return "$baseUri/xrpc/com.atproto.sync.getBlob?did=$owner&cid=$blobLink}"
     }
 }

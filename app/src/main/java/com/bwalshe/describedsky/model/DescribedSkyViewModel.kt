@@ -16,12 +16,12 @@ class DescribedSkyViewModel(
     private val blueSkyRepository: BlueSkyRepository,
 ) : ViewModel() {
 
-
     var timeline: List<FeedDefsFeedViewPost> by mutableStateOf(listOf())
 
     fun refreshTimeline() {
         timeline = blueSkyRepository.getTimeline()
     }
+
 
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {

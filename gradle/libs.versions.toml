@@ -1,6 +1,7 @@
 [versions]
 agp = "8.11.1"
 auth = "0.4.0-SNAPSHOT"
+coilCompose = "2.7.0"
 core = "0.4.0-SNAPSHOT"
 kotlin = "2.2.0"
 coreKtx = "1.16.0"
@@ -16,6 +17,7 @@ workRuntime = "2.10.3"
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 kbsky-auth = { module = "work.socialhub.kbsky:auth", version.ref = "auth" }
 kbsky-core = { module = "work.socialhub.kbsky:core", version.ref = "core" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

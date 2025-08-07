@@ -57,6 +57,7 @@ dependencies {
     implementation(libs.kbsky.core)
     implementation(libs.kbsky.auth)
     implementation(libs.kbsky.stream)
+    implementation(libs.coil.compose)
 
 
     testImplementation(libs.junit)
