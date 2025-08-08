@@ -9,14 +9,14 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.bwalshe.describedsky.DescribedSkyApplication
+import com.bwalshe.describedsky.data.BlueSkyPost
 import com.bwalshe.describedsky.data.BlueSkyRepository
-import work.socialhub.kbsky.model.app.bsky.feed.FeedDefsFeedViewPost
 
 class DescribedSkyViewModel(
     private val blueSkyRepository: BlueSkyRepository,
 ) : ViewModel() {
 
-    var timeline: List<FeedDefsFeedViewPost> by mutableStateOf(listOf())
+    var timeline: List<BlueSkyPost> by mutableStateOf(listOf())
 
     fun refreshTimeline() {
         timeline = blueSkyRepository.getTimeline()

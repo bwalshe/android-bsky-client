@@ -27,22 +27,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.bwalshe.describedsky.R
-import work.socialhub.kbsky.model.app.bsky.actor.ActorDefsProfileViewBasic
-import work.socialhub.kbsky.model.app.bsky.feed.FeedDefsFeedViewPost
-import work.socialhub.kbsky.model.app.bsky.feed.FeedDefsPostView
-import work.socialhub.kbsky.model.app.bsky.feed.FeedPost
+import com.bwalshe.describedsky.data.AuthorInfo
+import com.bwalshe.describedsky.data.BlueSkyEmbedding
+import com.bwalshe.describedsky.data.BlueSkyPost
 
 const val TAG = "TimeLineScreen"
 
 @Composable
 fun TimelineScreen(
-    posts: List<FeedDefsFeedViewPost>,
+    posts: List<BlueSkyPost>,
     modifier: Modifier = Modifier,
     refresh: () -> Unit = {},
     logout: () -> Unit = {},
 ) {
     Column(modifier) {
-        Text("Timeline Posts:",
+        Text(
+            "Timeline Posts:",
             fontWeight = FontWeight.Bold,
             fontSize = 20.sp
         )
@@ -94,19 +94,20 @@ fun ButtonRow(
 
 @Composable
 fun PostCard(
-    post: FeedDefsFeedViewPost,
-    modifier: Modifier = Modifier) {
+    post: BlueSkyPost,
+    modifier: Modifier = Modifier
+) {
     Card(
         modifier = modifier,
         shape = MaterialTheme.shapes.small
     ) {
-        val avatarUrl = post.post.author?.avatar
-        post.post.author?.did!!
+        val avatarUrl = post.author.avatarLink
         Log.d(TAG, "avatar url is $avatarUrl")
         Row {
             AsyncImage(
                 model = avatarUrl,
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier
+                    .size(32.dp)
                     .clip(MaterialTheme.shapes.small),
                 placeholder = painterResource(R.drawable.default_avatar),
                 contentDescription = "avatar image",
@@ -121,8 +122,8 @@ fun PostCard(
             ) {
                 PostHeader(post, Modifier.padding(bottom = 2.dp))
                 PostContents(
-                    post.post.record?.asFeedPost!!,
-                ) // TODO: Is it always safe to assume that a post can be converted this way?
+                    post,
+                )
             }
         }
     }
@@ -130,41 +131,77 @@ fun PostCard(
 
 @Composable
 fun PostContents(
-    post: FeedPost,
+    post: BlueSkyPost,
 ) {
     Text(post.text ?: "[text not found]")
+    if(post.embedding != null) {
+        PostEmbedding(post.embedding)
+    }
 }
 
 @Composable
-fun PostHeader(post: FeedDefsFeedViewPost, modifier: Modifier) {
-    val author = post.post.author
-    val handle = author?.handle ?: "UNKNOWN"
-    val name = author?.displayName ?: "UNKNOWN"
-    post.post.indexedAt
+fun PostEmbedding(
+    embedding: BlueSkyEmbedding
+) {
+    when (embedding) {
+        is BlueSkyEmbedding.Images -> {
+            val image = embedding.images[0]
+
+            AsyncImage(
+                model = image.link,
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = painterResource(R.drawable.missing_image),
+                contentDescription = image.altText,
+                contentScale = ContentScale.Crop,
+            )
+        }
+
+        is BlueSkyEmbedding.External -> {
+            Card {
+                Column {
+                    AsyncImage(
+                        model = embedding.thumbnailLink,
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = painterResource(R.drawable.missing_image),
+                        contentDescription = embedding.description,
+                        contentScale = ContentScale.Crop
+                    )
+                    if (embedding.description != null)
+                        Text(embedding.description)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun PostHeader(post: BlueSkyPost, modifier: Modifier) {
+    val author = post.author
     Row(modifier = modifier) {
-        Text(name, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.width(1.dp))
-        Text("@$handle", fontWeight = FontWeight.Light)
+        if (author.name != null) {
+            Text(author.name, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.width(1.dp))
+        }
+        Text("@${author.handle}", fontWeight = FontWeight.Light)
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun PreviewTimeline() {
-    val author = ActorDefsProfileViewBasic(
+    val author = AuthorInfo(
         did = "did:asdfasdfasf",
         handle = "person.example.com",
-        displayName = "Some Person ",
-        avatar = "https://example.com/avatar.jpg",
+        name = "Some Person ",
+        avatarLink = "https://example.com/avatar.jpg",
     )
-    val longRecord = FeedPost(
-        text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-    )
-    val shortRecord = FeedPost(text = "Let's keep this brief.")
+    val longText =
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+    val shortText = "Let's keep this brief."
     val posts = listOf(
-        FeedDefsFeedViewPost(post = FeedDefsPostView(author = author, record = shortRecord)),
-        FeedDefsFeedViewPost(post = FeedDefsPostView(author = author, record = longRecord)),
-        FeedDefsFeedViewPost(post = FeedDefsPostView(author = author, record = shortRecord))
+        BlueSkyPost(author = author, text = shortText),
+        BlueSkyPost(author = author, text = longText),
+        BlueSkyPost(author = author, text = shortText)
     )
     TimelineScreen(posts)
 }
