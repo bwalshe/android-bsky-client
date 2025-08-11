@@ -30,8 +30,32 @@ import com.bwalshe.describedsky.R
 import com.bwalshe.describedsky.data.AuthorInfo
 import com.bwalshe.describedsky.data.BlueSkyEmbedding
 import com.bwalshe.describedsky.data.BlueSkyPost
+import com.bwalshe.describedsky.model.TimelineState
 
 const val TAG = "TimeLineScreen"
+
+@Composable
+fun TimelineHome(
+    timelineState: TimelineState,
+    modifier: Modifier = Modifier,
+    refresh: () -> Unit = {},
+    logout: () -> Unit = {},
+) {
+    when(timelineState) {
+        is TimelineState.Loading -> LoadingScreen()
+        is TimelineState.Ready -> TimelineScreen(
+            posts = timelineState.timelinePosts,
+            modifier = modifier,
+            refresh = refresh,
+            logout = logout
+        )
+    }
+}
+
+@Composable
+fun LoadingScreen() {
+    Text("Loading...")
+}
 
 @Composable
 fun TimelineScreen(

@@ -11,10 +11,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.bwalshe.describedsky.model.DescribedSkyViewModel
+import com.bwalshe.describedsky.model.TimelineViewModel
 import com.bwalshe.describedsky.model.LoginViewModel
 import com.bwalshe.describedsky.ui.LoginScreen
-import com.bwalshe.describedsky.ui.TimelineScreen
+import com.bwalshe.describedsky.ui.TimelineHome
 import com.bwalshe.describedsky.ui.theme.DescribedskyTheme
 
 class MainActivity : ComponentActivity() {
@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
             DescribedskyTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     val loginViewModel: LoginViewModel = viewModel(factory = LoginViewModel.Factory)
-                    val describedSkyViewModel: DescribedSkyViewModel = viewModel(factory = DescribedSkyViewModel.Factory)
+                    val describedSkyViewModel: TimelineViewModel = viewModel(factory = TimelineViewModel.Factory)
                     HomeScreen(
                         loginViewModel,
                         describedSkyViewModel,
@@ -42,10 +42,10 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun HomeScreen(
     loginViewModel: LoginViewModel,
-    describedSkyViewModel: DescribedSkyViewModel,
+    describedSkyViewModel: TimelineViewModel,
     modifier: Modifier = Modifier) {
     if(loginViewModel.loggedIn) {
-       TimelineScreen(
+       TimelineHome(
            describedSkyViewModel.timeline,
            refresh = describedSkyViewModel::refreshTimeline,
            logout = {},
