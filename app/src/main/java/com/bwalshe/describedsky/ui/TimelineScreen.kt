@@ -1,6 +1,7 @@
 package com.bwalshe.describedsky.ui
 
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -29,6 +30,7 @@ import coil.compose.AsyncImage
 import com.bwalshe.describedsky.R
 import com.bwalshe.describedsky.data.AuthorInfo
 import com.bwalshe.describedsky.data.BlueSkyEmbedding
+import com.bwalshe.describedsky.data.BlueSkyImage
 import com.bwalshe.describedsky.data.BlueSkyPost
 import com.bwalshe.describedsky.model.TimelineState
 
@@ -41,7 +43,7 @@ fun TimelineHome(
     refresh: () -> Unit = {},
     logout: () -> Unit = {},
 ) {
-    when(timelineState) {
+    when (timelineState) {
         is TimelineState.Loading -> LoadingScreen()
         is TimelineState.Ready -> TimelineScreen(
             posts = timelineState.timelinePosts,
@@ -158,7 +160,7 @@ fun PostContents(
     post: BlueSkyPost,
 ) {
     Text(post.text ?: "[text not found]")
-    if(post.embedding != null) {
+    if (post.embedding != null) {
         PostEmbedding(post.embedding)
     }
 }
@@ -168,18 +170,7 @@ fun PostEmbedding(
     embedding: BlueSkyEmbedding
 ) {
     when (embedding) {
-        is BlueSkyEmbedding.Images -> {
-            val image = embedding.images[0]
-
-            AsyncImage(
-                model = image.link,
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = painterResource(R.drawable.missing_image),
-                contentDescription = image.altText,
-                contentScale = ContentScale.Crop,
-            )
-        }
-
+        is BlueSkyEmbedding.Images -> ImageGallery(embedding.images)
         is BlueSkyEmbedding.External -> {
             Card {
                 Column {
@@ -193,6 +184,56 @@ fun PostEmbedding(
                     if (embedding.description != null)
                         Text(embedding.description)
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun SingleImage(
+    image: BlueSkyImage
+) {
+    AsyncImage(
+        model = image.link,
+        placeholder = painterResource(R.drawable.missing_image),
+        contentDescription = image.altText,
+        contentScale = ContentScale.Crop,
+    )
+}
+
+@Composable
+fun ImageGallery(
+    images: List<BlueSkyImage>
+) {
+    when (images.size) {
+        0 -> Image(
+            painterResource(R.drawable.missing_image),
+            contentDescription = "Gallery not found"
+        )
+
+        1 -> SingleImage(images[0])
+        2 ->
+            Row(modifier = Modifier.fillMaxWidth()) {
+                SingleImage(images[0])
+                SingleImage(images[1])
+            }
+
+        3 -> Row(modifier = Modifier.fillMaxWidth()) {
+            SingleImage(images[0])
+            Column(modifier = Modifier.fillMaxHeight()){
+                SingleImage(images[1])
+                SingleImage(images[2])
+            }
+        }
+
+        else -> Column {
+            Row {
+                SingleImage(images[0])
+                SingleImage(images[1])
+            }
+            Row {
+                SingleImage(images[2])
+                SingleImage(images[3])
             }
         }
     }
@@ -222,10 +263,31 @@ fun PreviewTimeline() {
     val longText =
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
     val shortText = "Let's keep this brief."
+    val image = BlueSkyImage(link = "https://wwww.example.com/image.jpg", altText = "An image")
     val posts = listOf(
         BlueSkyPost(author = author, text = shortText),
         BlueSkyPost(author = author, text = longText),
-        BlueSkyPost(author = author, text = shortText)
+        BlueSkyPost(author = author, text = shortText),
+//        BlueSkyPost(
+//            author = author,
+//            text = shortText,
+//            embedding = BlueSkyEmbedding.Images(listOf(image))
+//        ),
+        BlueSkyPost(
+            author = author,
+            text = shortText,
+            embedding = BlueSkyEmbedding.Images(listOf(image, image))
+        ),
+        BlueSkyPost(
+            author = author,
+            text = shortText,
+            embedding = BlueSkyEmbedding.Images(listOf(image, image, image))
+        ),
+        BlueSkyPost(
+            author = author,
+            text = shortText,
+            embedding = BlueSkyEmbedding.Images(listOf(image, image, image, image))
+        )
     )
     TimelineScreen(posts)
 }
